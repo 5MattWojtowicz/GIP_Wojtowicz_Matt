@@ -14,10 +14,12 @@ public class PlayerMovement : MonoBehaviour
     bool afkoelen_walrunnen = false;
     float timer = 0f;
     public float afkoeltijd_walrunnen = 2f;
+    public float hoogte_persoon = 1f;
 
 
     private Rigidbody rb;
 
+    public Transform capsule;
     public Transform playerCamera;
 
 
@@ -37,19 +39,26 @@ public class PlayerMovement : MonoBehaviour
             moveZ = 1f;
         if (Input.GetKey(KeyCode.S))
             moveZ = -1f;
-        if (Input.GetKey(KeyCode.A))
-            moveX = -1f;
-        if (Input.GetKey(KeyCode.D))
-            moveX = 1f;
 
-        if (Input.GetKeyDown(KeyCode.C))
+        if (aan_het_walrunnen == false)
         {
 
+            if (Input.GetKey(KeyCode.A))
+                moveX = -1f;
+            if (Input.GetKey(KeyCode.D))
+                moveX = 1f;
         }
-
-
         Vector3 movement = new Vector3(moveX, 0f, moveZ).normalized;
         rb.MovePosition(rb.position + transform.TransformDirection(movement) * snelheid * Time.fixedDeltaTime);
+
+        if (Input.GetKey(KeyCode.C))
+        {
+            Crouchen();
+        }
+        else
+        {
+            Uncrouchen();
+        }
     }
     void OnCollisionStay(Collision collision)
     {
@@ -69,9 +78,8 @@ public class PlayerMovement : MonoBehaviour
                 Debug.Log("Gestart met Walrunnen");
                 kan_walrunnen = false;
                 aan_het_walrunnen = true;
-                rb.constraints = RigidbodyConstraints.FreezePositionY|
-                                 RigidbodyConstraints.FreezeRotation |
-                                 RigidbodyConstraints.FreezePositionX;
+                rb.constraints = RigidbodyConstraints.FreezePositionY |
+                                 RigidbodyConstraints.FreezeRotation;
             }
         }
     }
@@ -82,13 +90,21 @@ public class PlayerMovement : MonoBehaviour
         {
             raakt_grond = false;
         }
+        if (collision.gameObject.CompareTag("Muur"))
+        {
+            Debug.Log("gestopt met walrunnen");
+            afkoelen_walrunnen = true;
+            aan_het_walrunnen = false;
+            rb.constraints &= ~RigidbodyConstraints.FreezePositionX;
+            rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
+        }
 
     }
     void Update()
     {
         if (aan_het_walrunnen == true && Input.GetKeyDown(KeyCode.Space))
         {
-            transform.rotation = Quaternion.Euler(0f, playerCamera.eulerAngles.y, 0f);
+            //transform.rotation = Quaternion.Euler(0f, playerCamera.eulerAngles.y, 0f);
 
             Vector3 springhoek = playerCamera.forward;
 
@@ -117,5 +133,18 @@ public class PlayerMovement : MonoBehaviour
                 rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
             }
         }
+    }
+    public void Crouchen()
+    {
+            Vector3 scale = capsule.localScale;
+            scale.y = 0.5f;
+            capsule.localScale = scale;
+    }
+
+    public void Uncrouchen()
+    {
+        Vector3 scale = capsule.localScale;
+        scale.y = hoogte_persoon;
+        capsule.localScale = scale;
     }
 }
