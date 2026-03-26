@@ -3,18 +3,21 @@ using UnityEngine;
 public class PlayerLook : MonoBehaviour
 {
     public float mouseSensitivity = 1f;
-    public Transform playerCamera;    
+    public Transform playerCamera;
 
     private float xRotation = 0f;
     public float yRotation = 0f;
 
+    public float wallrunTilt = 15f;
+    public float tiltSpeed = 5f;
+    private float currentTilt = 0f;
+
+
     public PlayerMovement playerMovement;
-
-
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;   
+            Cursor.visible = false;                     
     }
 
     void Update()
@@ -24,19 +27,20 @@ public class PlayerLook : MonoBehaviour
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        yRotation += mouseX;
-        playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        if (PlayerMovement.aan_het_walrunnen == true)
+        transform.Rotate(Vector3.up * mouseX);
+
+        float targetTilt = 0f;
+
+        if (PlayerMovement.aan_het_walrunnen || PlayerMovement.zijdeling_walrunnen)
         {
-            playerCamera.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
-
-
-        }
-        else if (PlayerMovement.aan_het_walrunnen == false)
-        {
-            transform.Rotate(Vector3.up * mouseX);
+            targetTilt = wallrunTilt * PlayerMovement.wallSide;
         }
 
+        currentTilt = Mathf.Lerp(currentTilt, targetTilt, Time.deltaTime * tiltSpeed);
+
+        playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, currentTilt);
     }
+
+
 }
