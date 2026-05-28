@@ -48,6 +48,9 @@ public class PlayerMovement : MonoBehaviour
     public bool kan_zijdelings_walrunnen = true;
     public bool afkoelen_zijdelings_walrunnen = false;
 
+    public ParticleSystem speedLines;
+
+
     private Rigidbody rb;
 
     public Transform capsule;
@@ -65,7 +68,20 @@ public class PlayerMovement : MonoBehaviour
         float moveX = 0;
         float moveZ = 0;
 
-        if (Input.GetKey(KeyCode.W)) moveZ = 1f;
+        if (Input.GetKey(KeyCode.W))
+        {
+            moveZ = 1f;
+
+            if (!speedLines.isPlaying)
+                speedLines.Play();
+        }
+        else
+        {
+            moveZ = 0f;
+
+            if (speedLines.isPlaying)
+                speedLines.Stop();
+        }
         if (Input.GetKey(KeyCode.S)) moveZ = -1f;
         if (Input.GetKey(KeyCode.A)) moveX = -1f;
         if (Input.GetKey(KeyCode.D)) moveX = 1f;
