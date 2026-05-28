@@ -215,16 +215,6 @@ public class PlayerMovement : MonoBehaviour
             raakt_grond = true;
         }
 
-        if (Input.GetKey(KeyCode.Space))
-        {
-            if (collision.gameObject.CompareTag("Grond"))
-            {
-                raakt_grond = true;
-                kracht = 1f;
-                rb.AddForce(Vector3.up * spring_kracht, ForceMode.Impulse);
-            }
-        }
-
         if (kan_walrunnen)
         {
             if (collision.gameObject.CompareTag("Muur"))
@@ -293,6 +283,11 @@ public class PlayerMovement : MonoBehaviour
             rb.constraints &= ~RigidbodyConstraints.FreezePositionX;
             rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
         }
+        if (collision.gameObject.CompareTag("Grond"))
+        {
+            raakt_grond = false;
+        }
+
     }
 
     void Update()
@@ -376,6 +371,11 @@ public class PlayerMovement : MonoBehaviour
                 rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
             }
         }
+        if (Input.GetKeyDown(KeyCode.Space) && raakt_grond)
+        {
+            Jump();
+        }
+
     }
 
     public void Crouchen()
@@ -390,5 +390,10 @@ public class PlayerMovement : MonoBehaviour
         Vector3 scale = capsule.localScale;
         scale.y = hoogte_persoon;
         capsule.localScale = scale;
+    }
+    void Jump()
+    {
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        rb.AddForce(Vector3.up * spring_kracht, ForceMode.Impulse);
     }
 }
